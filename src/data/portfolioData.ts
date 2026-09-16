@@ -51,6 +51,13 @@ export const desktopIcons: DesktopIconItem[] = [
     textColorClass: 'text-secondary-container',
   },
   {
+    id: 'win-ie',
+    label: 'Internet Explorer',
+    icon: 'public',
+    bgClass: 'bg-primary-container/40 group-hover:bg-primary-container/70',
+    textColorClass: 'text-primary-fixed',
+  },
+  {
     id: 'win-recycle',
     label: 'Recycle Bin',
     icon: 'delete',
@@ -163,6 +170,18 @@ export const initialWindows: Record<WindowId, WindowConfig> = {
     position: { x: 224, y: 96 },
     width: '88vw',
     maxWidth: '440px',
+  },
+  'win-ie': {
+    id: 'win-ie',
+    title: 'Internet Explorer',
+    icon: 'public',
+    isOpen: false,
+    isMinimized: false,
+    zIndex: 25,
+    position: { x: 120, y: 40 },
+    width: '92vw',
+    maxWidth: '860px',
+    height: '560px',
   },
 };
 

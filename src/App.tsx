@@ -13,6 +13,7 @@ import { ResumeWindow } from './components/Windows/ResumeWindow';
 import { SkillsWindow } from './components/Windows/SkillsWindow';
 import { TerminalWindow } from './components/Windows/TerminalWindow';
 import { WelcomeWindow } from './components/Windows/WelcomeWindow';
+import { InternetExplorerWindow } from './components/Windows/InternetExplorerWindow';
 import { initialWindows, projectsData } from './data/portfolioData';
 import type { ProjectItem, WindowConfig, WindowId } from './types';
 
@@ -237,6 +238,18 @@ export const App: React.FC = () => {
           onPositionChange={(pos) => handlePositionChange('win-recycle', pos)}
         >
           <RecycleBinWindow />
+        </XpWindow>
+
+        {/* 10. Internet Explorer */}
+        <XpWindow
+          config={windows['win-ie']}
+          titlebarGradient="from-[#0055ea] via-[#2470d8] to-[#0040b5]"
+          onClose={() => closeWindow('win-ie')}
+          onMinimize={() => minimizeWindow('win-ie')}
+          onFocus={() => focusWindow('win-ie')}
+          onPositionChange={(pos) => handlePositionChange('win-ie', pos)}
+        >
+          <InternetExplorerWindow />
         </XpWindow>
 
         {/* Project Inspector Modal */}

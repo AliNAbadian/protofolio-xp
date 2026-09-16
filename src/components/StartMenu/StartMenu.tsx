@@ -46,6 +46,18 @@ export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onOpenWin
         <div className="w-7/12 bg-surface-container-lowest p-space-sm flex flex-col justify-between border-r border-outline-variant">
           <nav className="flex flex-col gap-space-xs">
             <button
+              onClick={() => handleItemClick('win-ie')}
+              className="flex items-center gap-space-sm px-space-sm py-space-xs rounded transition-all hover:bg-primary-container hover:text-on-primary-container text-left cursor-pointer group"
+            >
+              <span className="material-symbols-outlined text-[20px] text-primary group-hover:text-on-primary-container">
+                public
+              </span>
+              <span className="font-body-md text-body-md text-on-surface group-hover:text-on-primary-container font-bold">
+                Internet Explorer
+              </span>
+            </button>
+
+            <button
               onClick={() => handleItemClick('win-welcome')}
               className="flex items-center gap-space-sm px-space-sm py-space-xs rounded transition-all hover:bg-primary-container hover:text-on-primary-container text-left cursor-pointer group"
             >

@@ -7,7 +7,8 @@ export type WindowId =
   | 'win-skills'
   | 'win-resume'
   | 'win-contact'
-  | 'win-recycle';
+  | 'win-recycle'
+  | 'win-ie';
 
 export interface WindowConfig {
   id: WindowId;
