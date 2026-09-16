@@ -33,7 +33,7 @@ const getInitialPositions = (): Record<string, { x: number; y: number }> => {
   if (saved) {
     try {
       return { ...defaults, ...JSON.parse(saved) };
-    } catch {}
+    } catch { }
   }
   return defaults;
 };
@@ -122,7 +122,7 @@ export const Desktop: React.FC<DesktopProps> = ({
 
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {}
+    } catch { }
 
     if (drag.moved) {
       justDraggedRef.current = true;
@@ -170,23 +170,14 @@ export const Desktop: React.FC<DesktopProps> = ({
       onContextMenu={handleContextMenu}
       className="relative h-screen w-screen overflow-hidden select-none bg-surface font-body-md text-on-surface"
     >
-      {/* Wallpaper */}
-      {isWin7 ? (
-        <div className="absolute inset-0 bg-[#0f2d59] pointer-events-none z-0 overflow-hidden">
-          {/* Windows 7 Aero Harmony Wallpaper */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,#2b6fb8_0%,#0e3868_45%,#051833_100%)]"></div>
-          <div className="absolute inset-0 opacity-40 bg-[radial-gradient(ellipse_at_top,#6bb7ff_0%,transparent_60%)]"></div>
-          {/* Harmony crystal ribbons */}
-          <div className="absolute w-[800px] h-[500px] -top-20 left-1/2 -translate-x-1/2 rounded-[100%] border-t-[3px] border-[#aadcff]/40 blur-xs rotate-[-12deg]"></div>
-          <div className="absolute w-[900px] h-[600px] -top-32 left-1/2 -translate-x-1/2 rounded-[100%] border-t-[2px] border-[#55b0ff]/30 blur-sm rotate-[8deg]"></div>
-          <div className="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52 bg-[#4aa5ff]/20 rounded-full blur-2xl"></div>
-        </div>
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-b from-[#2470d8] via-[#5999ec] to-[#70a938] flex flex-col justify-between pointer-events-none z-0">
-          <div className="w-full h-1/2 bg-gradient-to-b from-[#1b58b8] to-transparent opacity-40"></div>
-          <div className="w-full h-1/2 bg-gradient-to-t from-[#488e1a] via-[#75b829] to-transparent opacity-90"></div>
-        </div>
-      )}
+      <div className="absolute inset-0 bg-[#0f2d59] pointer-events-none z-0 overflow-hidden">
+        <img
+          src="https://www.wallpaperhub.app/_next/image?url=https%3A%2F%2Fcdn.wallpaperhub.app%2Fcloudcache%2Fb%2Fd%2F7%2F6%2F4%2Fb%2Fbd764bb25d49a05105060185774ba14cd2c846f7.jpg&w=4500&q=100"
+          alt="Windows 7 Aero Wallpaper"
+          className="w-full h-full object-cover select-none"
+          loading="eager"
+        />
+      </div>
 
       {/* Left Quick-Access Dock */}
       <aside className="fixed left-0 top-0 bottom-10 w-24 z-10 flex flex-col items-center py-space-md gap-space-md pointer-events-auto">
@@ -265,11 +256,9 @@ export const Desktop: React.FC<DesktopProps> = ({
                   touchAction: 'none',
                   zIndex: isDragging ? 35 : isSelected ? 15 : 10,
                 }}
-                className={`desktop-icon group absolute top-0 left-0 flex flex-col items-center justify-center w-[76px] h-[72px] rounded p-1 transition-shadow pointer-events-auto select-none ${
-                  isDragging ? 'cursor-grabbing opacity-80 shadow-2xl scale-105' : 'cursor-pointer'
-                } ${
-                  isSelected ? 'bg-primary-container/30 ring-1 ring-primary-fixed' : ''
-                }`}
+                className={`desktop-icon group absolute top-0 left-0 flex flex-col items-center justify-center w-[76px] h-[72px] rounded p-1 transition-shadow pointer-events-auto select-none ${isDragging ? 'cursor-grabbing opacity-80 shadow-2xl scale-105' : 'cursor-pointer'
+                  } ${isSelected ? 'bg-primary-container/30 ring-1 ring-primary-fixed' : ''
+                  }`}
               >
                 <div
                   className={`w-10 h-10 flex items-center justify-center rounded-lg ${icon.bgClass} backdrop-blur-sm shadow-sm`}
