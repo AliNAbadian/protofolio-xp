@@ -15,14 +15,24 @@ import { TerminalWindow } from './components/Windows/TerminalWindow';
 import { WelcomeWindow } from './components/Windows/WelcomeWindow';
 import { InternetExplorerWindow } from './components/Windows/InternetExplorerWindow';
 import { initialWindows, projectsData } from './data/portfolioData';
-import type { ProjectItem, WindowConfig, WindowId } from './types';
+import type { OsTheme, ProjectItem, WindowConfig, WindowId } from './types';
+import { getNextTheme, getStoredTheme, saveTheme } from './utils/theme';
 
 export const App: React.FC = () => {
   const [windows, setWindows] = useState<Record<WindowId, WindowConfig>>(initialWindows);
+  const [theme, setTheme] = useState<OsTheme>(getStoredTheme);
   const [highestZ, setHighestZ] = useState(30);
   const [activeWindowId, setActiveWindowId] = useState<WindowId | null>('win-welcome');
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const next = getNextTheme(prev);
+      saveTheme(next);
+      return next;
+    });
+  };
 
   // Focus and bring window to front
   const focusWindow = (id: WindowId) => {
@@ -121,16 +131,18 @@ export const App: React.FC = () => {
 
   return (
     <div
+      data-theme={theme}
       onClick={() => {
         if (isStartMenuOpen) setIsStartMenuOpen(false);
       }}
       className="relative w-screen h-screen overflow-hidden select-none"
     >
-      <Desktop onOpenWindow={openWindow}>
+      <Desktop theme={theme} onToggleTheme={toggleTheme} onOpenWindow={openWindow}>
         {/* Floating Windows */}
 
         {/* 1. Welcome Wizard */}
         <XpWindow
+          theme={theme}
           config={windows['win-welcome']}
           titlebarGradient="from-primary via-primary-container to-primary"
           onClose={() => closeWindow('win-welcome')}
@@ -143,6 +155,7 @@ export const App: React.FC = () => {
 
         {/* 2. Projects Explorer */}
         <XpWindow
+          theme={theme}
           config={windows['win-projects']}
           titlebarGradient="from-primary via-primary-container to-primary"
           onClose={() => closeWindow('win-projects')}
@@ -158,6 +171,7 @@ export const App: React.FC = () => {
 
         {/* 3. AI Lab.exe */}
         <XpWindow
+          theme={theme}
           config={windows['win-ailab']}
           titlebarGradient="from-[#003cac] via-primary-container to-[#1a7425]"
           onClose={() => closeWindow('win-ailab')}
@@ -170,6 +184,7 @@ export const App: React.FC = () => {
 
         {/* 4. Retro Terminal (CMD.EXE) */}
         <XpWindow
+          theme={theme}
           config={windows['win-terminal']}
           titlebarGradient="from-inverse-surface via-on-surface-variant to-inverse-surface"
           onClose={() => closeWindow('win-terminal')}
@@ -182,6 +197,7 @@ export const App: React.FC = () => {
 
         {/* 5. About Me (System Properties) */}
         <XpWindow
+          theme={theme}
           config={windows['win-about']}
           titlebarGradient="from-primary via-primary-container to-primary"
           onClose={() => closeWindow('win-about')}
@@ -194,6 +210,7 @@ export const App: React.FC = () => {
 
         {/* 6. Skills (Device Manager) */}
         <XpWindow
+          theme={theme}
           config={windows['win-skills']}
           titlebarGradient="from-primary via-primary-container to-primary"
           onClose={() => closeWindow('win-skills')}
@@ -206,6 +223,7 @@ export const App: React.FC = () => {
 
         {/* 7. Resume (WordPad) */}
         <XpWindow
+          theme={theme}
           config={windows['win-resume']}
           titlebarGradient="from-primary via-primary-container to-primary"
           onClose={() => closeWindow('win-resume')}
@@ -218,6 +236,7 @@ export const App: React.FC = () => {
 
         {/* 8. Contact (Outlook Express) */}
         <XpWindow
+          theme={theme}
           config={windows['win-contact']}
           titlebarGradient="from-secondary via-secondary-container to-secondary"
           onClose={() => closeWindow('win-contact')}
@@ -230,6 +249,7 @@ export const App: React.FC = () => {
 
         {/* 9. Recycle Bin */}
         <XpWindow
+          theme={theme}
           config={windows['win-recycle']}
           titlebarGradient="from-primary via-primary-container to-primary"
           onClose={() => closeWindow('win-recycle')}
@@ -242,6 +262,7 @@ export const App: React.FC = () => {
 
         {/* 10. Internet Explorer */}
         <XpWindow
+          theme={theme}
           config={windows['win-ie']}
           titlebarGradient="from-[#0055ea] via-[#2470d8] to-[#0040b5]"
           onClose={() => closeWindow('win-ie')}
@@ -256,9 +277,11 @@ export const App: React.FC = () => {
         <ProjectDetailModal project={selectedProject} onClose={() => setSelectedProject(null)} />
       </Desktop>
 
-      {/* XP Start Menu */}
+      {/* Start Menu */}
       <StartMenu
         isOpen={isStartMenuOpen}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         onClose={() => setIsStartMenuOpen(false)}
         onOpenWindow={openWindow}
       />
@@ -268,6 +291,8 @@ export const App: React.FC = () => {
         windows={windows}
         activeWindowId={activeWindowId}
         isStartMenuOpen={isStartMenuOpen}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         onToggleStartMenu={() => setIsStartMenuOpen((prev) => !prev)}
         onTaskbarItemClick={handleTaskbarItemClick}
       />

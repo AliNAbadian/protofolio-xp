@@ -10,6 +10,8 @@ export type WindowId =
   | 'win-recycle'
   | 'win-ie';
 
+export type OsTheme = 'xp' | 'win7';
+
 export interface WindowConfig {
   id: WindowId;
   title: string;

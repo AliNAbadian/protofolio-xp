@@ -1,9 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { desktopIcons } from '../../data/portfolioData';
-import type { WindowId } from '../../types';
+import type { OsTheme, WindowId } from '../../types';
 
 interface DesktopProps {
   onOpenWindow: (id: WindowId) => void;
+  theme?: OsTheme;
+  onToggleTheme?: () => void;
   children: React.ReactNode;
 }
 
@@ -36,7 +38,12 @@ const getInitialPositions = (): Record<string, { x: number; y: number }> => {
   return defaults;
 };
 
-export const Desktop: React.FC<DesktopProps> = ({ onOpenWindow, children }) => {
+export const Desktop: React.FC<DesktopProps> = ({
+  onOpenWindow,
+  theme = 'xp',
+  onToggleTheme,
+  children,
+}) => {
   const [selectedIcon, setSelectedIcon] = useState<WindowId | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>(getInitialPositions);
@@ -47,6 +54,7 @@ export const Desktop: React.FC<DesktopProps> = ({ onOpenWindow, children }) => {
 
   const dragRef = useRef<DragState | null>(null);
   const justDraggedRef = useRef(false);
+  const isWin7 = theme === 'win7';
 
   const handleDesktopClick = (e: React.MouseEvent) => {
     if (!(e.target as HTMLElement).closest('.desktop-icon')) {
@@ -65,7 +73,7 @@ export const Desktop: React.FC<DesktopProps> = ({ onOpenWindow, children }) => {
     }
     e.preventDefault();
     const x = Math.min(e.clientX, window.innerWidth - 200);
-    const y = Math.min(e.clientY, window.innerHeight - 180);
+    const y = Math.min(e.clientY, window.innerHeight - 200);
     setContextMenu({ x, y });
   };
 
@@ -162,11 +170,23 @@ export const Desktop: React.FC<DesktopProps> = ({ onOpenWindow, children }) => {
       onContextMenu={handleContextMenu}
       className="relative h-screen w-screen overflow-hidden select-none bg-surface font-body-md text-on-surface"
     >
-      {/* XP Bliss Wallpaper Gradients */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#2470d8] via-[#5999ec] to-[#70a938] flex flex-col justify-between pointer-events-none z-0">
-        <div className="w-full h-1/2 bg-gradient-to-b from-[#1b58b8] to-transparent opacity-40"></div>
-        <div className="w-full h-1/2 bg-gradient-to-t from-[#488e1a] via-[#75b829] to-transparent opacity-90"></div>
-      </div>
+      {/* Wallpaper */}
+      {isWin7 ? (
+        <div className="absolute inset-0 bg-[#0f2d59] pointer-events-none z-0 overflow-hidden">
+          {/* Windows 7 Aero Harmony Wallpaper */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,#2b6fb8_0%,#0e3868_45%,#051833_100%)]"></div>
+          <div className="absolute inset-0 opacity-40 bg-[radial-gradient(ellipse_at_top,#6bb7ff_0%,transparent_60%)]"></div>
+          {/* Harmony crystal ribbons */}
+          <div className="absolute w-[800px] h-[500px] -top-20 left-1/2 -translate-x-1/2 rounded-[100%] border-t-[3px] border-[#aadcff]/40 blur-xs rotate-[-12deg]"></div>
+          <div className="absolute w-[900px] h-[600px] -top-32 left-1/2 -translate-x-1/2 rounded-[100%] border-t-[2px] border-[#55b0ff]/30 blur-sm rotate-[8deg]"></div>
+          <div className="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52 bg-[#4aa5ff]/20 rounded-full blur-2xl"></div>
+        </div>
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-b from-[#2470d8] via-[#5999ec] to-[#70a938] flex flex-col justify-between pointer-events-none z-0">
+          <div className="w-full h-1/2 bg-gradient-to-b from-[#1b58b8] to-transparent opacity-40"></div>
+          <div className="w-full h-1/2 bg-gradient-to-t from-[#488e1a] via-[#75b829] to-transparent opacity-90"></div>
+        </div>
+      )}
 
       {/* Left Quick-Access Dock */}
       <aside className="fixed left-0 top-0 bottom-10 w-24 z-10 flex flex-col items-center py-space-md gap-space-md pointer-events-auto">
@@ -279,6 +299,21 @@ export const Desktop: React.FC<DesktopProps> = ({ onOpenWindow, children }) => {
           className="absolute z-50 w-48 rounded bg-surface-container-lowest shadow-xl border border-outline-variant py-1 font-body-sm text-body-sm text-on-surface flex flex-col"
           style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
         >
+          {onToggleTheme && (
+            <div
+              onClick={() => {
+                onToggleTheme();
+                setContextMenu(null);
+              }}
+              className="px-space-md py-1.5 hover:bg-primary hover:text-on-primary cursor-pointer flex items-center justify-between gap-2 border-b border-surface-container"
+            >
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-[#0055ea]">palette</span>
+                <span className="font-bold">Theme: {isWin7 ? 'Win 7 (Aero)' : 'Win XP (Luna)'}</span>
+              </div>
+              <span className="text-[10px] px-1 rounded bg-[#ece9d8] text-black">Switch</span>
+            </div>
+          )}
           <div
             onClick={arrangeIcons}
             className="px-space-md py-1 hover:bg-primary hover:text-on-primary cursor-pointer flex items-center gap-2"

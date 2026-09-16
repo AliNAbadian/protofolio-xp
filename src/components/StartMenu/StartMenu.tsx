@@ -1,14 +1,23 @@
 import React from 'react';
-import type { WindowId } from '../../types';
+import type { OsTheme, WindowId } from '../../types';
 
 interface StartMenuProps {
   isOpen: boolean;
+  theme?: OsTheme;
+  onToggleTheme?: () => void;
   onClose: () => void;
   onOpenWindow: (id: WindowId) => void;
 }
 
-export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onOpenWindow }) => {
+export const StartMenu: React.FC<StartMenuProps> = ({
+  isOpen,
+  theme = 'xp',
+  onToggleTheme,
+  onClose,
+  onOpenWindow,
+}) => {
   if (!isOpen) return null;
+  const isWin7 = theme === 'win7';
 
   const handleItemClick = (id: WindowId) => {
     onOpenWindow(id);
@@ -19,7 +28,11 @@ export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onOpenWin
     <div
       id="xp-start-menu"
       onClick={(e) => e.stopPropagation()}
-      className="fixed left-0 bottom-10 z-50 w-[420px] rounded-t-lg shadow-[2px_2px_16px_rgba(0,0,0,0.55)] border-t-2 border-l-2 border-primary-container border-r-2 border-outline-variant bg-surface-container-lowest overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100"
+      className={`fixed left-0 bottom-10 z-50 w-[420px] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100 ${
+        isWin7
+          ? 'rounded-t-2xl bg-[#08182b]/90 backdrop-blur-2xl border-t border-l border-r border-white/40 shadow-[0_0_40px_rgba(0,10,30,0.85)] text-white'
+          : 'rounded-t-lg shadow-[2px_2px_16px_rgba(0,0,0,0.55)] border-t-2 border-l-2 border-primary-container border-r-2 border-outline-variant bg-surface-container-lowest'
+      }`}
     >
       {/* Start Menu Header */}
       <div className="h-14 bg-gradient-to-r from-primary via-primary-container to-primary-fixed-dim px-space-md flex items-center justify-between border-b border-primary-container">
@@ -155,6 +168,19 @@ export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onOpenWin
             <span className="font-body-sm text-body-sm font-bold">Control Panel</span>
           </button>
 
+          {/* Theme switcher button in Start Menu */}
+          {onToggleTheme && (
+            <button
+              onClick={onToggleTheme}
+              className="flex items-center gap-space-sm px-space-sm py-space-xs rounded bg-primary-container/20 hover:bg-primary-container/40 text-left cursor-pointer border border-primary/30"
+            >
+              <span className="material-symbols-outlined text-primary text-[18px]">palette</span>
+              <span className="font-body-sm text-body-sm font-bold">
+                Theme: {isWin7 ? 'Win 7 Aero' : 'XP Luna'}
+              </span>
+            </button>
+          )}
+
           <div className="h-[1px] bg-outline-variant my-space-xs"></div>
 
           <button
@@ -176,21 +202,38 @@ export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onOpenWin
       </div>
 
       {/* Footer Log Off / Turn Off */}
-      <div className="h-10 bg-gradient-to-r from-primary to-primary-container px-space-md flex items-center justify-end gap-space-md">
-        <button
-          onClick={() => alert('Logging off developer session...')}
-          className="flex items-center gap-space-xs text-on-primary hover:bg-primary-container/60 px-space-sm py-space-xs rounded cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[16px]">lock</span>
-          <span className="font-label-sm text-label-sm">Log Off</span>
-        </button>
-        <button
-          onClick={() => alert('Shutdown Ali OS...')}
-          className="flex items-center gap-space-xs text-on-primary hover:bg-error/60 px-space-sm py-space-xs rounded cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[16px]">power_settings_new</span>
-          <span className="font-label-sm text-label-sm">Turn Off Computer</span>
-        </button>
+      <div
+        className={`h-11 px-space-md flex items-center justify-between ${
+          isWin7
+            ? 'bg-[#08182b]/80 border-t border-white/20'
+            : 'bg-gradient-to-r from-primary to-primary-container'
+        }`}
+      >
+        {isWin7 ? (
+          <div className="flex-1 mr-3 flex items-center bg-white/10 border border-white/30 rounded px-2 py-1 text-xs text-white">
+            <span className="material-symbols-outlined text-[14px] text-white/60 mr-1.5">search</span>
+            <span className="text-white/60 italic text-[11px]">Search programs and files</span>
+          </div>
+        ) : (
+          <div></div>
+        )}
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => alert('Logging off developer session...')}
+            className="flex items-center gap-space-xs text-on-primary hover:bg-white/20 px-space-sm py-1 rounded cursor-pointer text-xs"
+          >
+            <span className="material-symbols-outlined text-[15px]">lock</span>
+            <span className="font-label-sm text-label-sm">Log Off</span>
+          </button>
+          <button
+            onClick={() => alert('Shutdown Ali OS...')}
+            className="flex items-center gap-space-xs text-on-primary bg-error/70 hover:bg-error px-space-sm py-1 rounded cursor-pointer text-xs shadow-xs font-bold"
+          >
+            <span className="material-symbols-outlined text-[15px]">power_settings_new</span>
+            <span className="font-label-sm text-label-sm">{isWin7 ? 'Shut down' : 'Turn Off'}</span>
+          </button>
+        </div>
       </div>
     </div>
   );
