@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { desktopIcons } from '../../data/portfolioData';
 import type { WindowId } from '../../types';
 
@@ -7,9 +7,46 @@ interface DesktopProps {
   children: React.ReactNode;
 }
 
+interface DragState {
+  id: string;
+  startX: number;
+  startY: number;
+  initX: number;
+  initY: number;
+  moved: boolean;
+}
+
+const getDefaultIconPos = (index: number) => {
+  const col = Math.floor(index / 6);
+  const row = index % 6;
+  return { x: 108 + col * 88, y: 16 + row * 84 };
+};
+
+const getInitialPositions = (): Record<string, { x: number; y: number }> => {
+  const defaults: Record<string, { x: number; y: number }> = {};
+  desktopIcons.forEach((icon, i) => {
+    defaults[icon.id] = getDefaultIconPos(i);
+  });
+  const saved = localStorage.getItem('xp_desktop_icon_positions');
+  if (saved) {
+    try {
+      return { ...defaults, ...JSON.parse(saved) };
+    } catch {}
+  }
+  return defaults;
+};
+
 export const Desktop: React.FC<DesktopProps> = ({ onOpenWindow, children }) => {
   const [selectedIcon, setSelectedIcon] = useState<WindowId | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>(getInitialPositions);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
+  const positionsRef = useRef(positions);
+  positionsRef.current = positions;
+
+  const dragRef = useRef<DragState | null>(null);
+  const justDraggedRef = useRef(false);
 
   const handleDesktopClick = (e: React.MouseEvent) => {
     if (!(e.target as HTMLElement).closest('.desktop-icon')) {
@@ -28,8 +65,95 @@ export const Desktop: React.FC<DesktopProps> = ({ onOpenWindow, children }) => {
     }
     e.preventDefault();
     const x = Math.min(e.clientX, window.innerWidth - 200);
-    const y = Math.min(e.clientY, window.innerHeight - 150);
+    const y = Math.min(e.clientY, window.innerHeight - 180);
     setContextMenu({ x, y });
+  };
+
+  const handleIconPointerDown = (id: string, e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    e.stopPropagation();
+    const current = positions[id] || getDefaultIconPos(desktopIcons.findIndex((i) => i.id === id));
+    dragRef.current = {
+      id,
+      startX: e.clientX,
+      startY: e.clientY,
+      initX: current.x,
+      initY: current.y,
+      moved: false,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handleIconPointerMove = (id: string, e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.id !== id) return;
+
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+
+    if (!drag.moved && Math.hypot(dx, dy) > 3) {
+      drag.moved = true;
+      setDraggingId(id);
+      setSelectedIcon(id as WindowId);
+    }
+
+    if (drag.moved) {
+      const newX = Math.max(0, Math.min(window.innerWidth - 80, drag.initX + dx));
+      const newY = Math.max(0, Math.min(window.innerHeight - 120, drag.initY + dy));
+      setPositions((prev) => {
+        const next = { ...prev, [id]: { x: newX, y: newY } };
+        positionsRef.current = next;
+        return next;
+      });
+    }
+  };
+
+  const handleIconPointerUp = (id: string, e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.id !== id) return;
+
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+
+    if (drag.moved) {
+      justDraggedRef.current = true;
+      setTimeout(() => {
+        justDraggedRef.current = false;
+      }, 100);
+      localStorage.setItem('xp_desktop_icon_positions', JSON.stringify(positionsRef.current));
+    } else {
+      setSelectedIcon(id as WindowId);
+    }
+
+    setDraggingId(null);
+    dragRef.current = null;
+  };
+
+  const arrangeIcons = () => {
+    const defaults: Record<string, { x: number; y: number }> = {};
+    desktopIcons.forEach((icon, i) => {
+      defaults[icon.id] = getDefaultIconPos(i);
+    });
+    setPositions(defaults);
+    positionsRef.current = defaults;
+    localStorage.setItem('xp_desktop_icon_positions', JSON.stringify(defaults));
+    setContextMenu(null);
+  };
+
+  const alignToGrid = () => {
+    setPositions((prev) => {
+      const aligned: Record<string, { x: number; y: number }> = {};
+      Object.entries(prev).forEach(([id, pos]) => {
+        const snappedX = Math.max(0, Math.round((pos.x - 20) / 88) * 88 + 20);
+        const snappedY = Math.max(0, Math.round((pos.y - 16) / 84) * 84 + 16);
+        aligned[id] = { x: snappedX, y: snappedY };
+      });
+      positionsRef.current = aligned;
+      localStorage.setItem('xp_desktop_icon_positions', JSON.stringify(aligned));
+      return aligned;
+    });
+    setContextMenu(null);
   };
 
   return (
@@ -96,24 +220,34 @@ export const Desktop: React.FC<DesktopProps> = ({ onOpenWindow, children }) => {
       </aside>
 
       {/* Main Desktop Area */}
-      <main className="relative z-10 w-full h-[calc(100vh-40px)] pl-24 pr-4 py-3 overflow-hidden">
-        {/* Desktop Icons Grid */}
-        <div
-          id="desktop-grid"
-          className="absolute inset-0 p-space-md pl-26 grid grid-flow-col grid-rows-6 gap-y-3 gap-x-4 w-max pointer-events-auto z-10"
-        >
-          {desktopIcons.map((icon) => {
+      <main className="relative z-10 w-full h-[calc(100vh-40px)] overflow-hidden">
+        {/* Desktop Icons */}
+        <div id="desktop-grid" className="absolute inset-0 pointer-events-none z-10">
+          {desktopIcons.map((icon, idx) => {
             const isSelected = selectedIcon === icon.id;
+            const isDragging = draggingId === icon.id;
+            const pos = positions[icon.id] || getDefaultIconPos(idx);
+
             return (
               <div
                 key={icon.id}
                 data-window={icon.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedIcon(icon.id);
+                onPointerDown={(e) => handleIconPointerDown(icon.id, e)}
+                onPointerMove={(e) => handleIconPointerMove(icon.id, e)}
+                onPointerUp={(e) => handleIconPointerUp(icon.id, e)}
+                onPointerCancel={(e) => handleIconPointerUp(icon.id, e)}
+                onDoubleClick={() => {
+                  if (justDraggedRef.current) return;
+                  onOpenWindow(icon.id);
                 }}
-                onDoubleClick={() => onOpenWindow(icon.id)}
-                className={`desktop-icon group flex flex-col items-center justify-center w-[76px] h-[72px] rounded cursor-pointer p-1 transition-all ${
+                style={{
+                  transform: `translate3d(${pos.x}px, ${pos.y}px, 0)`,
+                  touchAction: 'none',
+                  zIndex: isDragging ? 35 : isSelected ? 15 : 10,
+                }}
+                className={`desktop-icon group absolute top-0 left-0 flex flex-col items-center justify-center w-[76px] h-[72px] rounded p-1 transition-shadow pointer-events-auto select-none ${
+                  isDragging ? 'cursor-grabbing opacity-80 shadow-2xl scale-105' : 'cursor-pointer'
+                } ${
                   isSelected ? 'bg-primary-container/30 ring-1 ring-primary-fixed' : ''
                 }`}
               >
@@ -146,13 +280,16 @@ export const Desktop: React.FC<DesktopProps> = ({ onOpenWindow, children }) => {
           style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
         >
           <div
-            onClick={() => {
-              alert('Icons arranged by importance.');
-              setContextMenu(null);
-            }}
+            onClick={arrangeIcons}
             className="px-space-md py-1 hover:bg-primary hover:text-on-primary cursor-pointer flex items-center gap-2"
           >
-            <span className="material-symbols-outlined text-[16px]">sort</span> Arrange Icons
+            <span className="material-symbols-outlined text-[16px]">sort</span> Auto Arrange Icons
+          </div>
+          <div
+            onClick={alignToGrid}
+            className="px-space-md py-1 hover:bg-primary hover:text-on-primary cursor-pointer flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-[16px]">grid_view</span> Align to Grid
           </div>
           <div
             onClick={() => {
