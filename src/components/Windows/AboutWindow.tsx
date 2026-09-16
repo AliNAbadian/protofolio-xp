@@ -15,24 +15,22 @@ export const AboutWindow: React.FC<AboutWindowProps> = ({ onClose, onOpenWindow 
       <div className="px-space-sm pt-2 bg-surface-container-high flex items-center gap-1 border-b border-outline-variant/30 text-[12px]">
         <button
           onClick={() => setActiveTab('general')}
-          className={`px-space-md py-1 rounded-t font-label-md text-label-md cursor-pointer transition-colors ${
-            activeTab === 'general'
+          className={`px-space-md py-1 rounded-t font-label-md text-label-md cursor-pointer transition-colors ${activeTab === 'general'
               ? 'bg-surface-container-lowest text-primary font-bold shadow-sm'
               : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-low'
-          }`}
+            }`}
         >
-          General
+          General~
         </button>
         <button
           onClick={() => {
             setActiveTab('arch');
             alert('Architecture tab: Modular Rspack Federation & Feature-Sliced Design.');
           }}
-          className={`px-space-md py-1 rounded-t font-label-md text-label-md cursor-pointer transition-colors ${
-            activeTab === 'arch'
+          className={`px-space-md py-1 rounded-t font-label-md text-label-md cursor-pointer transition-colors ${activeTab === 'arch'
               ? 'bg-surface-container-lowest text-primary font-bold shadow-sm'
               : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-low'
-          }`}
+            }`}
         >
           Architecture
         </button>
@@ -41,11 +39,10 @@ export const AboutWindow: React.FC<AboutWindowProps> = ({ onClose, onOpenWindow 
             setActiveTab('hw');
             alert('Hardware: Tabriz Remote Workstation, dual high-refresh displays, fiber uplink.');
           }}
-          className={`px-space-md py-1 rounded-t font-label-md text-label-md cursor-pointer transition-colors ${
-            activeTab === 'hw'
+          className={`px-space-md py-1 rounded-t font-label-md text-label-md cursor-pointer transition-colors ${activeTab === 'hw'
               ? 'bg-surface-container-lowest text-primary font-bold shadow-sm'
               : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-low'
-          }`}
+            }`}
         >
           Hardware
         </button>
